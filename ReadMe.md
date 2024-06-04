@@ -10,8 +10,6 @@ This is a simple To-Do List API built with ASP.NET Core and PostgreSQL using Ent
 - [Database Migration](#database-migration)
 - [Running the Application](#running-the-application)
 - [API Endpoints](#api-endpoints)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Prerequisites
 
