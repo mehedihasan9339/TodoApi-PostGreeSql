@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TodoApi.Data;
@@ -11,9 +12,11 @@ using TodoApi.Data;
 namespace TodoApi.Migrations
 {
     [DbContext(typeof(TodoContext))]
-    partial class TodoContextModelSnapshot : ModelSnapshot
+    [Migration("20240606185149_memberrelation")]
+    partial class memberrelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,62 +27,62 @@ namespace TodoApi.Migrations
 
             modelBuilder.Entity("TodoApi.Models.MemberInfo", b =>
                 {
-                    b.Property<long>("id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime?>("dateofbirth")
+                    b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("name")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("phone")
+                    b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
-                    b.ToTable("MemberInfos", "todo");
+                    b.ToTable("MemberInfos");
                 });
 
             modelBuilder.Entity("TodoApi.Models.TodoItem", b =>
                 {
-                    b.Property<long>("id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<bool>("iscomplete")
+                    b.Property<bool>("IsComplete")
                         .HasColumnType("boolean");
 
-                    b.Property<long>("memberinfoid")
+                    b.Property<long>("MemberInfoId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("name")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
-                    b.HasIndex("memberinfoid");
+                    b.HasIndex("MemberInfoId");
 
-                    b.ToTable("TodoItems", "todo");
+                    b.ToTable("TodoItems");
                 });
 
             modelBuilder.Entity("TodoApi.Models.TodoItem", b =>
                 {
-                    b.HasOne("TodoApi.Models.MemberInfo", "memberinfo")
+                    b.HasOne("TodoApi.Models.MemberInfo", "MemberInfo")
                         .WithMany()
-                        .HasForeignKey("memberinfoid")
+                        .HasForeignKey("MemberInfoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("memberinfo");
+                    b.Navigation("MemberInfo");
                 });
 #pragma warning restore 612, 618
         }

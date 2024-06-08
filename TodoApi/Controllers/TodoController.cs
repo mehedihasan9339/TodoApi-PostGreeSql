@@ -2,26 +2,30 @@
 using Microsoft.EntityFrameworkCore;
 using TodoApi.Data;
 using TodoApi.Models;
+using TodoApi.Services;
+using TodoApi.ViewModels;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TodoApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class TodoController : ControllerBase
     {
         private readonly TodoContext _context;
+        private readonly IDapper _dapper;
 
-        public TodoController(TodoContext context)
+        public TodoController(TodoContext context, IDapper dapper)
         {
             _context = context;
+            _dapper = dapper;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
         {
-            return await _context.TodoItems.ToListAsync();
+            return await _context.TodoItems.Include(x => x.memberinfo).ToListAsync();
         }
 
         [HttpGet("{id}")]
@@ -38,9 +42,17 @@ namespace TodoApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem todoItem)
+        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItemViewModel todoItem)
         {
-            _context.TodoItems.Add(todoItem);
+            var data = new TodoItem
+            {
+                id = todoItem.Id,
+                name = todoItem.Name,
+                iscomplete = todoItem.IsComplete,
+                memberinfoid = todoItem.MemberInfoId
+            };
+
+            _context.TodoItems.Add(data);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
@@ -49,7 +61,7 @@ namespace TodoApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTodoItem(long id, TodoItem todoItem)
         {
-            if (id != todoItem.Id)
+            if (id != todoItem.id)
             {
                 return BadRequest();
             }
@@ -90,9 +102,25 @@ namespace TodoApi.Controllers
             return NoContent();
         }
 
+        [HttpGet]
         private bool TodoItemExists(long id)
         {
-            return _context.TodoItems.Any(e => e.Id == id);
+            return _context.TodoItems.Any(e => e.id == id);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMemberWiseTodoItems(long memberId)
+        {
+            var data = await _context.TodoItems.Include(x => x.memberinfo).Where(x => x.memberinfoid == memberId).AsNoTracking().ToListAsync();
+            return Ok(data);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMemberWiseTodoItemsBySP(long memberId)
+        {
+            var results = await _dapper.FromSqlAsync<MemberTodoItemDTO>($@"CALL get_member_todo_items({memberId});");
+
+            return Ok(results);
         }
     }
 }
